@@ -1,0 +1,30 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /build
+
+# Copy only package files first for layer caching
+COPY package*.json ./
+RUN npm ci --only=production
+
+# ── Runtime stage ─────────────────────────────────────────────────────────────
+FROM node:20-alpine AS runtime
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy production node_modules from builder (no devDependencies in final image)
+COPY --from=builder /build/node_modules ./node_modules
+
+# Copy application source
+COPY app.js .
+COPY views/ ./views/
+
+USER appuser
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:3000/health || exit 1
+
+CMD ["node", "app.js"]

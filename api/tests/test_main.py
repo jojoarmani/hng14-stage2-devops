@@ -22,7 +22,7 @@ def client(mock_redis):
     return TestClient(app)
 
 
-# ── Health endpoint ───────────────────────────────────────────────────────────
+# ── Health endpoint ──────────
 
 def test_health_ok(client, mock_redis):
     """GET /health returns 200 when Redis is reachable."""
@@ -40,7 +40,7 @@ def test_health_redis_down(client, mock_redis):
     assert response.status_code == 503
 
 
-# ── Create job ────────────────────────────────────────────────────────────────
+# ── Create job ──────
 
 def test_create_job_returns_job_id(client, mock_redis):
     """POST /jobs creates a job and returns a UUID job_id."""
@@ -75,7 +75,7 @@ def test_create_job_sets_queued_status(client, mock_redis):
     assert args[2] == "queued"
 
 
-# ── Get job ───────────────────────────────────────────────────────────────────
+# ── Get job ────
 
 def test_get_existing_job(client, mock_redis):
     """GET /jobs/{id} returns status for a known job."""
